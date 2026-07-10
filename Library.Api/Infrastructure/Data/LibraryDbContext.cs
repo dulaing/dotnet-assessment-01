@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Library.Api.Infrastructure.Data;
 
+// Central EF Core unit of work for the library schema.
 public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options) : DbContext(options)
 {
     public DbSet<Book> Books => Set<Book>();
@@ -11,6 +12,7 @@ public sealed class LibraryDbContext(DbContextOptions<LibraryDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // These mappings enforce the database constraints called out in the assessment.
         modelBuilder.Entity<Book>(entity =>
         {
             entity.HasKey(book => book.Id);

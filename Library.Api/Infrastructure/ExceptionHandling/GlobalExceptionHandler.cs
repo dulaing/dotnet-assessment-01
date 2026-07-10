@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Diagnostics;
 
 namespace Library.Api.Infrastructure.ExceptionHandling;
 
+// Converts application exceptions into the API's standard error payloads.
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)

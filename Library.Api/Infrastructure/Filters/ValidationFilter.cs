@@ -4,6 +4,7 @@ using Library.Api.Contracts.Common;
 
 namespace Library.Api.Infrastructure.Filters;
 
+// Runs data annotation validation before the handler executes.
 public sealed class ValidationFilter<TRequest> : IEndpointFilter
     where TRequest : class
 {
