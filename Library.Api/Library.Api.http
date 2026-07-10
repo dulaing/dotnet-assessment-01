@@ -1,6 +1,68 @@
 @Library.Api_HostAddress = http://localhost:5131
 
-GET {{Library.Api_HostAddress}}/weatherforecast/
+### Get all books
+GET {{Library.Api_HostAddress}}/api/books
+Accept: application/json
+
+###
+
+### Create a book
+POST {{Library.Api_HostAddress}}/api/books
+Content-Type: application/json
+
+{
+  "title": "Working Effectively with Legacy Code",
+  "author": "Michael Feathers",
+  "isbn": "9780131177055",
+  "publishedYear": 2004,
+  "totalCopies": 2
+}
+
+###
+
+### Get all members
+GET {{Library.Api_HostAddress}}/api/members
+Accept: application/json
+
+###
+
+### Register a member
+POST {{Library.Api_HostAddress}}/api/members
+Content-Type: application/json
+
+{
+  "fullName": "Katherine Johnson",
+  "email": "katherine@example.com",
+  "phoneNumber": "555-0103"
+}
+
+###
+
+### Borrow a book
+POST {{Library.Api_HostAddress}}/api/borrowings
+Content-Type: application/json
+
+{
+  "bookId": 1001,
+  "memberId": 2001
+}
+
+###
+
+### Get all borrowings
+GET {{Library.Api_HostAddress}}/api/borrowings
+Accept: application/json
+
+###
+
+### Get borrowings by member
+GET {{Library.Api_HostAddress}}/api/members/2001/borrowings
+Accept: application/json
+
+###
+
+### Return a borrowed book
+POST {{Library.Api_HostAddress}}/api/borrowings/1/return
 Accept: application/json
 
 ###
