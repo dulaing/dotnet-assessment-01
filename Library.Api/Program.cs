@@ -1,7 +1,9 @@
+using Library.Api.Application.Interfaces;
+using Library.Api.Application.Services;
 using Library.Api.Endpoints;
-using Library.Api.Infrastructure.ExceptionHandling;
-using Library.Api.Infrastructure.Filters;
 using Library.Api.Infrastructure.Data;
+using Library.Api.Infrastructure.ExceptionHandling;
+using Library.Api.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,8 @@ builder.Services.AddDbContext<LibraryDbContext>(options =>
 builder.Services.AddOpenApi();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IBookService, BookService>();
 
 var app = builder.Build();
 
