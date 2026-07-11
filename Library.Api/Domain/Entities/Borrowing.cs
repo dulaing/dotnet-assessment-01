@@ -29,6 +29,18 @@ public sealed class Borrowing
 
     public Enums.BorrowingStatus Status { get; set; }
 
+    // Marks a borrowing as returned exactly once.
+    public void ReturnBook(DateTime returnedDateUtc)
+    {
+        if (ReturnedDate is not null || Status == Enums.BorrowingStatus.Returned)
+        {
+            throw new InvalidOperationException("Book has already been returned");
+        }
+
+        ReturnedDate = returnedDateUtc;
+        Status = Enums.BorrowingStatus.Returned;
+    }
+
     private static DateTime NormalizeUtc(DateTime value)
     {
         if (value == default)

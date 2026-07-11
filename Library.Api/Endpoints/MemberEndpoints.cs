@@ -12,6 +12,7 @@ public static class MemberEndpoints
         var group = app.MapGroup("/api/members")
             .WithTags("Members");
 
+        // Lists every registered member.
         group.MapGet(
                 string.Empty,
                 async (IMemberService memberService, CancellationToken cancellationToken) =>
@@ -19,6 +20,7 @@ public static class MemberEndpoints
             .WithName("GetMembers")
             .Produces<IReadOnlyList<MemberResponse>>(StatusCodes.Status200OK);
 
+        // Fetches one member by its identifier.
         group.MapGet(
                 "/{id:int}",
                 async (int id, IMemberService memberService, CancellationToken cancellationToken) =>
@@ -27,6 +29,7 @@ public static class MemberEndpoints
             .Produces<MemberResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
 
+        // Registers a new member with the default active state.
         group.MapPost(
                 string.Empty,
                 async (CreateMemberRequest request, IMemberService memberService, CancellationToken cancellationToken) =>
@@ -40,6 +43,7 @@ public static class MemberEndpoints
             .Produces<ValidationErrorResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status409Conflict);
 
+        // Updates member details and active status.
         group.MapPut(
                 "/{id:int}",
                 async (int id, UpdateMemberRequest request, IMemberService memberService, CancellationToken cancellationToken) =>
@@ -51,6 +55,7 @@ public static class MemberEndpoints
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status409Conflict);
 
+        // Removes a member when borrowing history does not block deletion.
         group.MapDelete(
                 "/{id:int}",
                 async (int id, IMemberService memberService, CancellationToken cancellationToken) =>

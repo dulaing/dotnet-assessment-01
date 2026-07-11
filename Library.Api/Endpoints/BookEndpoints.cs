@@ -12,6 +12,7 @@ public static class BookEndpoints
         var group = app.MapGroup("/api/books")
             .WithTags("Books");
 
+        // Lists every book so callers can browse the catalog.
         group.MapGet(
                 string.Empty,
                 async (IBookService bookService, CancellationToken cancellationToken) =>
@@ -19,6 +20,7 @@ public static class BookEndpoints
             .WithName("GetBooks")
             .Produces<IReadOnlyList<BookResponse>>(StatusCodes.Status200OK);
 
+        // Fetches one book by its identifier.
         group.MapGet(
                 "/{id:int}",
                 async (int id, IBookService bookService, CancellationToken cancellationToken) =>
@@ -27,6 +29,7 @@ public static class BookEndpoints
             .Produces<BookResponse>(StatusCodes.Status200OK)
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound);
 
+        // Creates a new book record and returns its location.
         group.MapPost(
                 string.Empty,
                 async (CreateBookRequest request, IBookService bookService, CancellationToken cancellationToken) =>
@@ -40,6 +43,7 @@ public static class BookEndpoints
             .Produces<ValidationErrorResponse>(StatusCodes.Status400BadRequest)
             .Produces<ErrorResponse>(StatusCodes.Status409Conflict);
 
+        // Updates an existing book while preserving service-side rules.
         group.MapPut(
                 "/{id:int}",
                 async (int id, UpdateBookRequest request, IBookService bookService, CancellationToken cancellationToken) =>
@@ -51,6 +55,7 @@ public static class BookEndpoints
             .Produces<ErrorResponse>(StatusCodes.Status404NotFound)
             .Produces<ErrorResponse>(StatusCodes.Status409Conflict);
 
+        // Removes a book when no borrowing history blocks deletion.
         group.MapDelete(
                 "/{id:int}",
                 async (int id, IBookService bookService, CancellationToken cancellationToken) =>
