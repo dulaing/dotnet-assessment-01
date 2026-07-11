@@ -1,1 +1,641 @@
-
+openapi: 3.1.1
+info:
+  title: Library.Api | v1
+  version: 1.0.0
+servers:
+- url: http://localhost:5131/
+paths:
+  /api/members/{memberId}/borrowings:
+    get:
+      tags:
+      - Borrowings
+      operationId: GetBorrowingsByMember
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BorrowingResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/books:
+    get:
+      tags:
+      - Books
+      operationId: GetBooks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookResponse'
+    post:
+      tags:
+      - Books
+      operationId: CreateBook
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/books/{id}:
+    get:
+      tags:
+      - Books
+      operationId: GetBookById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - Books
+      operationId: UpdateBook
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Books
+      operationId: DeleteBook
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/members:
+    get:
+      tags:
+      - Members
+      operationId: GetMembers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MemberResponse'
+    post:
+      tags:
+      - Members
+      operationId: CreateMember
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemberRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/members/{id}:
+    get:
+      tags:
+      - Members
+      operationId: GetMemberById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      tags:
+      - Members
+      operationId: UpdateMember
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMemberRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      tags:
+      - Members
+      operationId: DeleteMember
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      responses:
+        '204':
+          description: No Content
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/borrowings:
+    post:
+      tags:
+      - Borrowings
+      operationId: CreateBorrowing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBorrowingRequest'
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowingResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+      - Borrowings
+      operationId: GetBorrowings
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BorrowingResponse'
+  /api/borrowings/{id}/return:
+    post:
+      tags:
+      - Borrowings
+      operationId: ReturnBorrowedBook
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowingResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    BookResponse:
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+        publishedYear:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        totalCopies:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        availableCopies:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+    BorrowingResponse:
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        bookId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        memberId:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        borrowedDate:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        returnedDate:
+          type:
+          - 'null'
+          - string
+          format: date-time
+        status:
+          type: string
+    CreateBookRequest:
+      required:
+      - title
+      - author
+      - isbn
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+        publishedYear:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        totalCopies:
+          maximum: 2147483647
+          minimum: 1
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+    CreateBorrowingRequest:
+      type: object
+      properties:
+        bookId:
+          maximum: 2147483647
+          minimum: 1
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        memberId:
+          maximum: 2147483647
+          minimum: 1
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+    CreateMemberRequest:
+      required:
+      - fullName
+      - email
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type:
+          - 'null'
+          - string
+    ErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        message:
+          type: string
+        traceId:
+          type:
+          - 'null'
+          - string
+    MemberResponse:
+      type: object
+      properties:
+        id:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        fullName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type:
+          - 'null'
+          - string
+        registeredDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+    UpdateBookRequest:
+      required:
+      - title
+      - author
+      - isbn
+      type: object
+      properties:
+        title:
+          type: string
+        author:
+          type: string
+        isbn:
+          type: string
+        publishedYear:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        totalCopies:
+          maximum: 2147483647
+          minimum: 1
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        availableCopies:
+          maximum: 2147483647
+          minimum: 0
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+    UpdateMemberRequest:
+      required:
+      - fullName
+      - email
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        phoneNumber:
+          type:
+          - 'null'
+          - string
+        isActive:
+          type: boolean
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    ValidationErrorResponse:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+        statusCode:
+          pattern: ^-?(?:0|[1-9]\d*)$
+          type:
+          - integer
+          - string
+          format: int32
+        message:
+          type: string
+        traceId:
+          type:
+          - 'null'
+          - string
+tags:
+- name: Borrowings
+- name: Books
+- name: Members
