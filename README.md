@@ -59,6 +59,14 @@ The OpenAPI document is available at:
 http://localhost:5131/openapi/v1.json
 ```
 
+All endpoints grouped by resource, with the request and response contracts and documented status codes:
+
+![Swagger UI overview of the Library API endpoints and schemas](docs/images/swagger-overview.png)
+
+Each operation documents its request body and every response it can return. For example, `POST /api/borrowings` shows the `201 Created` body alongside the `400`, `404`, and `409` error shapes (`statusCode`, `message`, `traceId`, plus `errors` for validation failures):
+
+![Swagger UI detail of POST /api/borrowings showing request body and 201/400/404/409 responses](docs/images/swagger-create-borrowing.png)
+
 ## Example Requests
 
 See [Library.Api.http](/C:/Projects/260709-dotnet-assessment-01/Library.Api/Library.Api.http:1) for ready-to-run examples covering books, members, and borrowings.
