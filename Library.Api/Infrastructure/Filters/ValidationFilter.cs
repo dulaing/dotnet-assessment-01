@@ -1,35 +1,33 @@
-using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Library.Api.Application.Exceptions;
 using Library.Api.Contracts.Common;
 
 namespace Library.Api.Infrastructure.Filters;
 
-// Runs data annotation validation before the handler executes.
+// Runs the FluentValidation validator for the request before the handler executes.
 public sealed class ValidationFilter<TRequest> : IEndpointFilter
     where TRequest : class
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
         var request = context.Arguments.OfType<TRequest>().FirstOrDefault();
+        var validator = context.HttpContext.RequestServices.GetService<IValidator<TRequest>>();
 
-        if (request is null)
+        if (request is null || validator is null)
         {
             return await next(context);
         }
 
-        var validationResults = new List<ValidationResult>();
-        var validationContext = new ValidationContext(request);
+        var result = await validator.ValidateAsync(request);
 
-        if (!Validator.TryValidateObject(request, validationContext, validationResults, validateAllProperties: true))
+        if (!result.IsValid)
         {
-            var errors = validationResults
-                .SelectMany(
-                    result => result.MemberNames.DefaultIfEmpty(string.Empty),
-                    (result, memberName) => new ValidationError
-                    {
-                        Field = memberName,
-                        Message = result.ErrorMessage ?? "Validation failed."
-                    })
+            var errors = result.Errors
+                .Select(failure => new ValidationError
+                {
+                    Field = failure.PropertyName,
+                    Message = failure.ErrorMessage
+                })
                 .ToArray();
 
             throw new ValidationFailedException("Validation failed", errors);

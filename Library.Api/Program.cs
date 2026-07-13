@@ -1,6 +1,8 @@
+using FluentValidation;
 using Library.Api.Application.Abstractions;
 using Library.Api.Application.Interfaces;
 using Library.Api.Application.Services;
+using Library.Api.Application.Validation;
 using Library.Api.Endpoints;
 using Library.Api.Infrastructure.CurrentUser;
 using Library.Api.Infrastructure.Data;
@@ -13,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("LibraryDatabase")
     ?? throw new InvalidOperationException("Connection string 'LibraryDatabase' was not found.");
 
+builder.Services.AddValidatorsFromAssemblyContaining<CreateBookRequestValidator>();
 builder.Services.AddSingleton<ICurrentUserService, SystemCurrentUserService>();
 builder.Services.AddDbContext<LibraryDbContext>(options =>
     options.UseNpgsql(connectionString));
