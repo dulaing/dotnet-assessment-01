@@ -1,8 +1,9 @@
+using Library.Api.Domain.Common;
+
 namespace Library.Api.Domain.Entities;
 
-public sealed class Book
+public sealed class Book : AuditableEntity<int>
 {
-    public int Id { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Author { get; set; } = string.Empty;
     public string Isbn { get; set; } = string.Empty;

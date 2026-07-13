@@ -10,6 +10,7 @@ public sealed class BorrowingConfiguration : IEntityTypeConfiguration<Borrowing>
     public void Configure(EntityTypeBuilder<Borrowing> builder)
     {
         builder.HasKey(borrowing => borrowing.Id);
+        builder.ConfigureAudit();
 
         builder.HasOne<Book>()
             .WithMany()
