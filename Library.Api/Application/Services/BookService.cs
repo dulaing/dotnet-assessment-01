@@ -1,7 +1,6 @@
 using Library.Api.Application.Exceptions;
 using Library.Api.Application.Interfaces;
 using Library.Api.Contracts.Books;
-using Library.Api.Contracts.Common;
 using Library.Api.Domain.Entities;
 using Library.Api.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +29,6 @@ public sealed class BookService(IBookRepository bookRepository) : IBookService
     {
         var normalizedIsbn = request.Isbn.Trim();
         await EnsureIsbnIsUniqueAsync(normalizedIsbn, null, cancellationToken);
-        ValidateBookRules(request.PublishedYear, request.TotalCopies, request.TotalCopies);
 
         // New books start with every copy available until borrowings exist.
         var book = new Book
@@ -56,7 +54,6 @@ public sealed class BookService(IBookRepository bookRepository) : IBookService
 
         var normalizedIsbn = request.Isbn.Trim();
         await EnsureIsbnIsUniqueAsync(normalizedIsbn, id, cancellationToken);
-        ValidateBookRules(request.PublishedYear, request.TotalCopies, request.AvailableCopies);
 
         book.Title = request.Title.Trim();
         book.Author = request.Author.Trim();
@@ -100,34 +97,6 @@ public sealed class BookService(IBookRepository bookRepository) : IBookService
         if (existingBook is not null && existingBook.Id != currentBookId)
         {
             throw new ConflictException("A book with the same ISBN already exists");
-        }
-    }
-
-    private static void ValidateBookRules(int publishedYear, int totalCopies, int availableCopies)
-    {
-        var errors = new List<ValidationError>();
-
-        if (publishedYear > DateTime.UtcNow.Year)
-        {
-            errors.Add(new ValidationError
-            {
-                Field = nameof(CreateBookRequest.PublishedYear),
-                Message = "Published year cannot be in the future."
-            });
-        }
-
-        if (availableCopies > totalCopies)
-        {
-            errors.Add(new ValidationError
-            {
-                Field = nameof(UpdateBookRequest.AvailableCopies),
-                Message = "Available copies cannot be greater than total copies."
-            });
-        }
-
-        if (errors.Count > 0)
-        {
-            throw new ValidationFailedException("Validation failed", errors);
         }
     }
 
