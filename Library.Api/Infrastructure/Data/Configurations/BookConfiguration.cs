@@ -14,6 +14,7 @@ public sealed class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.Property(book => book.Author).HasMaxLength(150);
         builder.Property(book => book.Isbn).HasMaxLength(20);
         builder.HasIndex(book => book.Isbn).IsUnique();
+        builder.ConfigureAudit();
 
         builder.HasData(
             new Book
@@ -24,7 +25,9 @@ public sealed class BookConfiguration : IEntityTypeConfiguration<Book>
                 Isbn = "9780201616224",
                 PublishedYear = 1999,
                 TotalCopies = 4,
-                AvailableCopies = 4
+                AvailableCopies = 4,
+                CreatedAtUtc = SeedDefaults.SeedTimestamp,
+                CreatedBy = SeedDefaults.SeedUser
             },
             new Book
             {
@@ -34,7 +37,9 @@ public sealed class BookConfiguration : IEntityTypeConfiguration<Book>
                 Isbn = "9780134494166",
                 PublishedYear = 2017,
                 TotalCopies = 2,
-                AvailableCopies = 2
+                AvailableCopies = 2,
+                CreatedAtUtc = SeedDefaults.SeedTimestamp,
+                CreatedBy = SeedDefaults.SeedUser
             });
     }
 }

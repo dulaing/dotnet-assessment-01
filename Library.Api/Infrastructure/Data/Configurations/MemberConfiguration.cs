@@ -14,6 +14,7 @@ public sealed class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.Property(member => member.Email).HasMaxLength(256);
         builder.Property(member => member.PhoneNumber).HasMaxLength(20);
         builder.HasIndex(member => member.Email).IsUnique();
+        builder.ConfigureAudit();
 
         builder.HasData(
             new Member
@@ -22,8 +23,10 @@ public sealed class MemberConfiguration : IEntityTypeConfiguration<Member>
                 FullName = "Ada Lovelace",
                 Email = "ada.seed@example.com",
                 PhoneNumber = "555-1001",
-                RegisteredDate = new DateTime(2026, 7, 10, 0, 0, 0, DateTimeKind.Utc),
-                IsActive = true
+                RegisteredDate = SeedDefaults.SeedTimestamp,
+                IsActive = true,
+                CreatedAtUtc = SeedDefaults.SeedTimestamp,
+                CreatedBy = SeedDefaults.SeedUser
             },
             new Member
             {
@@ -31,8 +34,10 @@ public sealed class MemberConfiguration : IEntityTypeConfiguration<Member>
                 FullName = "Grace Hopper",
                 Email = "grace.seed@example.com",
                 PhoneNumber = "555-1002",
-                RegisteredDate = new DateTime(2026, 7, 10, 0, 0, 0, DateTimeKind.Utc),
-                IsActive = true
+                RegisteredDate = SeedDefaults.SeedTimestamp,
+                IsActive = true,
+                CreatedAtUtc = SeedDefaults.SeedTimestamp,
+                CreatedBy = SeedDefaults.SeedUser
             });
     }
 }
