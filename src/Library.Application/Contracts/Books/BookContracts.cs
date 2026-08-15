@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Library.Application.Contracts.Books
+﻿namespace Library.Application.Contracts.Books
 {
     public record CreateBookRequest(string Title, string Author, string Isbn, int PublishedYear, int TotalCopies);
 
