@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using Library.Domain.Common;
 using Library.Domain.Enums;
-
 
 namespace Library.Domain.Entities
 {
@@ -17,15 +17,16 @@ namespace Library.Domain.Entities
         public DateTime? ReturnedDate { get; set; }
         public BorrowingStatus Status { get; set; }
 
-        public void ReturnBook(DateTime returnedDateUtc)
+        public Result<Borrowing> ReturnBook(DateTime returnedDateUtc)
         {
             if (ReturnedDate is not null || Status == BorrowingStatus.Returned)
             {
-                throw new InvalidOperationException("Book has alraedy been returned");
+                return Result<Borrowing>.Conflict("book_already_returned", "This borrowing was already returned.");
             }
 
             ReturnedDate = returnedDateUtc;
             Status = BorrowingStatus.Returned;
+            return Result<Borrowing>.Success(this);
         }
     }
 }

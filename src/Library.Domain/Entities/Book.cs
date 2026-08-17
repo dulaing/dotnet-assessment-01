@@ -1,4 +1,6 @@
-﻿namespace Library.Domain.Entities
+﻿using Library.Domain.Common;
+
+namespace Library.Domain.Entities
 {
     public class Book
     {
@@ -10,24 +12,26 @@
         public int TotalCopies {  get; set; }
         public int AvailableCopies { get; set; }
 
-        public void BorrowCopy()
+        public Result<Book> BorrowCopy()
         {
             if (AvailableCopies <= 0)
             {
-                throw new InvalidOperationException("Book is unavailable");
+                return Result<Book>.Conflict("book_unavailable", "No copies available to borrow.");
             }
 
             AvailableCopies -= 1;
+            return Result<Book>.Success(this);
         }
 
-        public void ReturnCopy()
+        public Result<Book> ReturnCopy()
         {
             if (AvailableCopies >= TotalCopies)
             {
-                throw new InvalidOperationException("All copies are already available");
+                return Result<Book>.Conflict("book_already_returned", "All copies are already available");
             }
 
             AvailableCopies += 1;
+            return Result<Book>.Success(this);
         }
     }
 }
