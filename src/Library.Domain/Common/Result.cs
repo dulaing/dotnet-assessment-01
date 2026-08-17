@@ -1,4 +1,4 @@
-namespace Library.Application.Common
+namespace Library.Domain.Common
 {
     // explicit outcome model so expected failures (not_found, conflict, validation) are returned as data instead of thrown as exceptions
     public enum ResultErrorType
@@ -24,7 +24,7 @@ namespace Library.Application.Common
         }
 
         public static Result<T> Success(T value) => new(true, value, null);
-
+  
         public static Result<T> Failure(ResultError error) => new(false, default, error);
 
         public static Result<T> NotFound(string code, string message) => Failure(new ResultError(ResultErrorType.NotFound, code, message));
