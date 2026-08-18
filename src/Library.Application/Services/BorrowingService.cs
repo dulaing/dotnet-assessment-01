@@ -56,12 +56,13 @@ namespace Library.Application.Services
                 return borrowed.ToFailure<BorrowingResponse>();
             }
 
+            var now = DateTime.UtcNow;
             var borrowing = new Borrowing
             {
                 BookId = book.Id,
                 MemberId = member.Id,
-                BorrowedDate = DateTime.UtcNow,
-                DueDate = DateTime.UtcNow.AddDays(14),
+                BorrowedDate = now,
+                DueDate = now.AddDays(LoanPeriodDays),
                 Status = BorrowingStatus.Borrowed
             };
 
