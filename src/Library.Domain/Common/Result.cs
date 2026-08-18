@@ -8,7 +8,14 @@ namespace Library.Domain.Common
         Validation
     }
 
-    public record ResultError(ResultErrorType Type, string Code, string Message);
+    // basically a small object used to hold information about an error
+    // record = data holder
+    public record ResultError
+    (
+        ResultErrorType Type, 
+        string Code, 
+        string Message
+    );
 
     public class Result<T>
     {
@@ -26,6 +33,17 @@ namespace Library.Domain.Common
         public static Result<T> Success(T value) => new(true, value, null);
   
         public static Result<T> Failure(ResultError error) => new(false, default, error);
+
+         // carry a failure to a different value type, since the error survives but T does not
+        public Result<TOut> ToFailure<TOut>()
+        {
+            if (Error is null)
+            {
+                throw new InvalidOperationException("Cannot convert a successful result to a failure.");
+            }
+
+            return Result<TOut>.Failure(Error);
+        }
 
         public static Result<T> NotFound(string code, string message) => Failure(new ResultError(ResultErrorType.NotFound, code, message));
 
