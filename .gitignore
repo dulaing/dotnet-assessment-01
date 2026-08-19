@@ -27,3 +27,11 @@ coverage.*
 Thumbs.db
 
 .claude/
+
+# Node tooling for the architecture map (not part of the .NET build)
+node_modules/
+architecture/
+architecture.config.json
+package*
+scripts/
+architecture.html
