@@ -14,7 +14,7 @@ namespace Library.Domain.Entities
         public Result<Member> EnsureCanBorrow()
         {
             if (!IsActive) {
-                return Result<Member>.Validation("member_inactive", "Inactive members cannot borrow books.");
+                return Result<Member>.Conflict("member_inactive", "Inactive members cannot borrow books.");
             }
 
             return Result<Member>.Success(this);
