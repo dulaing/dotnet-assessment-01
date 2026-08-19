@@ -27,7 +27,7 @@ namespace Library.Domain.Entities
         {
             if (AvailableCopies >= TotalCopies)
             {
-                return Result<Book>.Conflict("book_already_returned", "All copies are already available");
+                return Result<Book>.Conflict("book_copies_inconsistent", "Available copies already match total copies.");
             }
 
             AvailableCopies += 1;
