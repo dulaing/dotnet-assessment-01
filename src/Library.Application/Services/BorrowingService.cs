@@ -9,7 +9,7 @@ namespace Library.Application.Services
     // orchestrates the borrow flow across member, book, and borrowing
     public class BorrowingService
     {
-        private const int MaxActiveBorrowingsPerMember = 5;
+        private const int MaxActiveBorrowingsPerMember = 3;
         private const int LoanPeriodDays = 14;
 
         private readonly IBookRepository _books;
