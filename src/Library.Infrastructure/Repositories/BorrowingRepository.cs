@@ -34,5 +34,11 @@ namespace Library.Infrastructure.Repositories
 
         public Task<int> SaveChangesAsync(CancellationToken cancellationToken) =>
             _db.SaveChangesAsync(cancellationToken);
+
+        // deleting a book that has a loan history - return a clean 409
+        // "does any borrowing row point at this book"
+        // AnyAsync is a SELECT EXISTS, so Postgres stops at the first hit instead of counting everything.
+        public Task<bool> ExistsForBookAsync(int bookId, CancellationToken cancellationToken) =>
+            _db.Borrowings.AnyAsync(b => b.BookId == bookId, cancellationToken);
     }
 }

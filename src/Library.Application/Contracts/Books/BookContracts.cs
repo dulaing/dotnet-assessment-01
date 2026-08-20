@@ -17,4 +17,12 @@
         int TotalCopies, 
         int AvailableCopies
     );
+
+    public record UpdateBookRequest(
+        string Title, 
+        string Author, 
+        string Isbn, 
+        int PublishedYear, 
+        int TotalCopies
+    );
 }

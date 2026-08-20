@@ -13,7 +13,8 @@ namespace Library.Application.Interfaces
         Task<List<Borrowing>> GetActiveByMemberIdAsync(int memberId, CancellationToken cancellationToken); // get all active borrowings for a member
         Task AddAsync(Borrowing borrowing, CancellationToken cancellationToken);
         void Update(Borrowing borrowing);
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken); 
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+        Task<bool> ExistsForBookAsync(int bookId, CancellationToken cancellationToken);
 
     }
 }
