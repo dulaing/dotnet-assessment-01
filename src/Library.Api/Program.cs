@@ -23,5 +23,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapBookEndpoints();
+app.MapMemberEndpoints();
 
 app.Run();
