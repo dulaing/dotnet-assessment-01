@@ -40,5 +40,9 @@ namespace Library.Infrastructure.Repositories
         // AnyAsync is a SELECT EXISTS, so Postgres stops at the first hit instead of counting everything.
         public Task<bool> ExistsForBookAsync(int bookId, CancellationToken cancellationToken) =>
             _db.Borrowings.AnyAsync(b => b.BookId == bookId, cancellationToken);
+
+        public Task<bool> ExistsForMemberAsync(int memberId, CancellationToken cancellationToken) =>
+            _db.Borrowings.AnyAsync(b => b.MemberId == memberId, cancellationToken);
+
     }
 }

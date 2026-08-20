@@ -14,4 +14,11 @@ namespace Library.Application.Contracts.Members
         DateTime RegisteredDate, 
         bool IsActive
     );
+    
+    public record UpdateMemberRequest(
+        string FullName, 
+        string Email, 
+        string? PhoneNumber, 
+        bool IsActive
+    );
 }

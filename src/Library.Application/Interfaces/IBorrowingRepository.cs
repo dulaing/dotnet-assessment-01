@@ -15,6 +15,7 @@ namespace Library.Application.Interfaces
         void Update(Borrowing borrowing);
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);
         Task<bool> ExistsForBookAsync(int bookId, CancellationToken cancellationToken);
+        Task<bool> ExistsForMemberAsync(int memberId, CancellationToken cancellationToken);
 
     }
 }
