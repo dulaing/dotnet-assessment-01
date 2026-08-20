@@ -20,6 +20,14 @@ namespace Library.Infrastructure.Repositories
         public Task<Borrowing?> GetByIdAsync(int id, CancellationToken cancellationToken) =>
             _db.Borrowings.FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
 
+        // full history for a member, newest first, unlike GetActiveByMemberIdAsync which only counts open loans
+        public Task<List<Borrowing>> GetByMemberIdAsync(int memberId, CancellationToken cancellationToken) =>
+            _db.Borrowings
+                .AsNoTracking()
+                .Where(b => b.MemberId == memberId)
+                .OrderByDescending(b => b.BorrowedDate)
+                .ToListAsync(cancellationToken);
+
         // a loan is active while it has no returned date
         public Task<List<Borrowing>> GetActiveByMemberIdAsync(int memberId, CancellationToken cancellationToken) =>
             _db.Borrowings

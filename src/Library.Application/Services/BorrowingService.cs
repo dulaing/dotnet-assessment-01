@@ -119,6 +119,24 @@ namespace Library.Application.Services
             return Result<BorrowingResponse>.Success(ToResponse(borrowing));
         }
 
+        public async Task<List<BorrowingResponse>> GetAllAsync(CancellationToken cancellationToken)
+        {
+            var borrowings = await _borrowings.GetAllAsync(cancellationToken);
+            return borrowings.Select(ToResponse).ToList();
+        }
+
+        public async Task<Result<List<BorrowingResponse>>> GetByMemberIdAsync(int memberId, CancellationToken cancellationToken)
+        {
+            var member = await _members.GetByIdAsync(memberId, cancellationToken);
+            if (member is null)
+            {
+                return Result<List<BorrowingResponse>>.NotFound("member_not_found", $"Member {memberId} was not found.");
+            }
+
+            var borrowings = await _borrowings.GetByMemberIdAsync(memberId, cancellationToken);
+            return Result<List<BorrowingResponse>>.Success(borrowings.Select(ToResponse).ToList());
+        }
+
         private static BorrowingResponse ToResponse(Borrowing borrowing) => new(
             borrowing.Id,
             borrowing.MemberId,

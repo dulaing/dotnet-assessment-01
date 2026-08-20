@@ -24,5 +24,6 @@ if (app.Environment.IsDevelopment())
 
 app.MapBookEndpoints();
 app.MapMemberEndpoints();
+app.MapBorrowingEndpoints();
 
 app.Run();
