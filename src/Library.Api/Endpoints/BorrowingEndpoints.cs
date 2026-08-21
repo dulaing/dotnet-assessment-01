@@ -1,6 +1,7 @@
 using Library.Api.Extensions;
 using Library.Application.Contracts.Borrowings;
 using Library.Application.Services;
+using Library.Api.Filters;
 
 namespace Library.Api.Endpoints
 {
@@ -35,7 +36,9 @@ namespace Library.Api.Endpoints
             .WithName("ReturnBook")
             .Produces<BorrowingResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .AddEndpointFilter<ValidationFilter<CreateBorrowingRequest>>();
 
             // sits under the member url but returns borrowings, so it is mapped with them
             app.MapGet("/api/members/{memberId:int}/borrowings", async (int memberId, BorrowingService service, HttpContext http, CancellationToken ct) =>

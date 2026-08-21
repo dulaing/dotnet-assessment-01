@@ -1,6 +1,7 @@
 using Library.Api.Extensions;
 using Library.Application.Contracts.Members;
 using Library.Application.Services;
+using Library.Api.Filters;
 
 namespace Library.Api.Endpoints
 {
@@ -33,7 +34,9 @@ namespace Library.Api.Endpoints
             })
             .WithName("CreateMember")
             .Produces<MemberResponse>(StatusCodes.Status201Created)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .AddEndpointFilter<ValidationFilter<CreateMemberRequest>>();
 
             group.MapPut("/{id:int}", async (int id, UpdateMemberRequest request, MemberService service, HttpContext http, CancellationToken ct) =>
             {
@@ -43,7 +46,9 @@ namespace Library.Api.Endpoints
             .WithName("UpdateMember")
             .Produces<MemberResponse>()
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .AddEndpointFilter<ValidationFilter<UpdateMemberRequest>>();
 
             group.MapDelete("/{id:int}", async (int id, MemberService service, HttpContext http, CancellationToken ct) =>
             {
