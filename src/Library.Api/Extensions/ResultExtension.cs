@@ -9,6 +9,7 @@ namespace Library.Api.Extensions
         public static IResult ToProblem<T>(this Result<T> result, HttpContext httpContext)
         {
             var error = result.Error!;
+            var traceId = Activity.Current?.Id ?? httpContext.TraceIdentifier;
 
             // _=> is the catch all, if someone adds a fourth error, it fails loudly as a 500 instead of returning nothing
             var status = error.Type switch
@@ -19,6 +20,13 @@ namespace Library.Api.Extensions
                 _ => StatusCodes.Status500InternalServerError
             };
 
+            // warning not error, because a rejected request is the system working as designed
+            httpContext.RequestServices
+                .GetRequiredService<ILoggerFactory>()
+                .CreateLogger("Library.Api.Results")
+                .LogWarning("Request rejected on {Method} {Path} with {Code} returning {Status} for trace {TraceId}",
+                    httpContext.Request.Method, httpContext.Request.Path, error.Code, status, traceId);
+
             // writes the standard error shape
             // RFC 7807 - the thing your spec calls ProblemDetails
             return Results.Problem(
@@ -27,7 +35,7 @@ namespace Library.Api.Extensions
                 extensions: new Dictionary<string, object?>
                 {
                     ["code"] = error.Code,
-                    ["traceId"] = Activity.Current?.Id ?? httpContext.TraceIdentifier
+                    ["traceId"] = traceId
                 });
         }
     }

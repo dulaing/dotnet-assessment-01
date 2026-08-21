@@ -3,6 +3,7 @@ using Library.Application.Interfaces;
 using Library.Domain.Common;
 using Library.Domain.Entities;
 using Library.Domain.Enums;
+using Microsoft.Extensions.Logging;
 
 namespace Library.Application.Services
 {
@@ -15,12 +16,15 @@ namespace Library.Application.Services
         private readonly IBookRepository _books;
         private readonly IMemberRepository _members;
         private readonly IBorrowingRepository _borrowings;
+        private readonly ILogger<BorrowingService> _logger;
+        
 
-        public BorrowingService(IBookRepository books, IMemberRepository members, IBorrowingRepository borrowings)
+        public BorrowingService(IBookRepository books, IMemberRepository members, IBorrowingRepository borrowings, ILogger<BorrowingService> logger)
         {
             _books = books;
             _members = members;
             _borrowings = borrowings;
+            _logger = logger;
         }
 
         public async Task<Result<BorrowingResponse>> BorrowAsync(CreateBorrowingRequest request, CancellationToken cancellationToken)
@@ -77,6 +81,9 @@ namespace Library.Application.Services
             _books.Update(book);
             await _borrowings.SaveChangesAsync(cancellationToken);
 
+            _logger.LogInformation("Member {MemberId} borrowed book {BookId} as borrowing {BorrowingId}, {AvailableCopies} copies left",
+                member.Id, book.Id, borrowing.Id, book.AvailableCopies);
+
             return Result<BorrowingResponse>.Success(ToResponse(borrowing));
         }
 
@@ -115,6 +122,9 @@ namespace Library.Application.Services
             _borrowings.Update(borrowing);
             _books.Update(book);
             await _borrowings.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Borrowing {BorrowingId} returned for book {BookId}, {AvailableCopies} copies available",
+                borrowing.Id, book.Id, book.AvailableCopies);
 
             return Result<BorrowingResponse>.Success(ToResponse(borrowing));
         }
