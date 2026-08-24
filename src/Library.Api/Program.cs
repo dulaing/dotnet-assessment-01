@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// wiring to Aspire
+builder.AddServiceDefaults();
+
 // Fluent Validations
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookRequestValidator>();
 

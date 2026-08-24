@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Library.AppHost/Library.AppHost.csproj" />
+    <Project Path="src/Library.ServiceDefaults/Library.ServiceDefaults.csproj" />
+  </Folder>
   <Project Path="src/Library.Api/Library.Api.csproj" />
   <Project Path="src/Library.Application/Library.Application.csproj" Id="327bd570-d4f9-4c39-8e4d-9a4b302429d0" />
   <Project Path="src/Library.Domain/Library.Domain.csproj" Id="593859f7-3086-4c75-ad92-0a09f06cd9a1" />
