@@ -8,3 +8,27 @@ services:
       POSTGRES_PASSWORD: librarypassword
     ports:
       - "5432:5432"
+    volumes:
+      - library-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U libraryuser -d librarydb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: library-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__LibraryDb: Host=postgres;Port=5432;Database=librarydb;Username=libraryuser;Password=librarypassword
+    ports:
+      - "8080:8080"
+
+volumes:
+  library-data:

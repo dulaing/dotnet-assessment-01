@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.idea/
+.git/
+.github/
+.claude/
+docs/
+*.md
+Dockerfile
+docker-compose.yml
+**/appsettings.Development.json
