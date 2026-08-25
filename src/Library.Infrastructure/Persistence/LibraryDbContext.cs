@@ -14,6 +14,7 @@ namespace Library.Infrastructure.Persistence
         public DbSet<Book> Books => Set<Book>();
         public DbSet<Member> Members => Set<Member>();
         public DbSet<Borrowing> Borrowings => Set<Borrowing>();
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

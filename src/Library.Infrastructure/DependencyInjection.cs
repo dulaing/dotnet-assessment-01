@@ -18,7 +18,8 @@ namespace Library.Infrastructure
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<IMemberRepository, MemberRepository>();
             services.AddScoped<IBorrowingRepository, BorrowingRepository>();
-            
+            services.AddScoped<IUserRepository, UserRepository>();
+
             // the db check lives here because this layer owns the DbContext
             services.AddHealthChecks().AddDbContextCheck<LibraryDbContext>("database");
 
