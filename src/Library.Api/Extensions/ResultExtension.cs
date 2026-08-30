@@ -17,6 +17,7 @@ namespace Library.Api.Extensions
                 ResultErrorType.NotFound => StatusCodes.Status404NotFound,
                 ResultErrorType.Conflict => StatusCodes.Status409Conflict,
                 ResultErrorType.Validation => StatusCodes.Status400BadRequest,
+                ResultErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
                 _ => StatusCodes.Status500InternalServerError
             };
 

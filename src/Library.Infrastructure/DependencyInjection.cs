@@ -1,6 +1,7 @@
 ﻿using Library.Application.Interfaces;
 using Library.Infrastructure.Persistence;
 using Library.Infrastructure.Repositories;
+using Library.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +20,8 @@ namespace Library.Infrastructure
             services.AddScoped<IMemberRepository, MemberRepository>();
             services.AddScoped<IBorrowingRepository, BorrowingRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
+            services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
 
             // the db check lives here because this layer owns the DbContext
             services.AddHealthChecks().AddDbContextCheck<LibraryDbContext>("database");

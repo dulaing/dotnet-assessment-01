@@ -2,6 +2,7 @@
 using Library.Application.Services;
 using Library.Infrastructure;
 using Library.Api.Handlers;
+using Library.Infrastructure.Persistence;
 
 using FluentValidation;
 using Library.Application.Validators;
@@ -16,6 +17,7 @@ builder.AddServiceDefaults();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookRequestValidator>();
 
 // builder.Configuration is appsettings already loaded and parsed
+// AddInfrastructure comes from DependencyInjection
 builder.Services.AddInfrastructure(builder.Configuration);
 
 // register the global exception handler
@@ -28,6 +30,8 @@ builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BorrowingService>();
 
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<AuthService>();
 
 var app =  builder.Build();
 
@@ -43,6 +47,8 @@ if (app.Environment.IsDevelopment())
 app.MapBookEndpoints();
 app.MapMemberEndpoints();
 app.MapBorrowingEndpoints();
+
+app.MapAuthEndpoints();
 
 // no checks at all, so this only proves the process is up and answering
 app.MapHealthChecks("/alive", new HealthCheckOptions { Predicate = _ => false });
@@ -64,5 +70,7 @@ app.MapHealthChecks("/health", new HealthCheckOptions
         });
     }
 }); 
+
+await app.Services.SeedAdminAsync();
 
 app.Run();
