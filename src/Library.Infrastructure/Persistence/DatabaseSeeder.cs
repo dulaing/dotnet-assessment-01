@@ -3,6 +3,7 @@ using Library.Domain.Entities;
 using Library.Domain.Enums;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Infrastructure.Persistence
 {
@@ -12,6 +13,9 @@ namespace Library.Infrastructure.Persistence
         {
             // repositories are scoped, so startup code has to open its own scope to resolve them
             using var scope = services.CreateScope();
+
+            var db = scope.ServiceProvider.GetRequiredService<LibraryDbContext>();
+            await db.Database.MigrateAsync();
 
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
             var email = configuration["Seed:AdminEmail"];

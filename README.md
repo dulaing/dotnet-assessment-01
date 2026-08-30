@@ -25,16 +25,18 @@ docker compose up -d
 
 ## Running Migrations
 
-Install local tools if needed:
+Migrations are applied automatically on startup, so a fresh clone only needs PostgreSQL running before the API starts. This is a deliberate dev-time convenience: a real deployment would run migrations as a separate step before the app boots, rather than granting the running application permission to rewrite its own schema.
+
+To apply them by hand instead, install the local tools:
 
 ```bash
 dotnet tool restore
 ```
 
-Apply migrations with:
+Then run:
 
 ```bash
-dotnet dotnet-ef database update --project Library.Api/Library.Api.csproj --startup-project Library.Api/Library.Api.csproj
+dotnet ef database update --project src/Library.Infrastructure --startup-project src/Library.Api
 ```
 
 ## Running the API
