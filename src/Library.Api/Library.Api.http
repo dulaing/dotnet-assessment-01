@@ -1,0 +1,45 @@
+@baseUrl = http://localhost:5131
+@memberId = 1
+
+### Login as the seeded administrator
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@library.local",
+  "password": "Admin#12345"
+}
+
+### Read the authenticated account
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{login.response.body.$.accessToken}}
+
+### Create a member login account as an administrator
+POST {{baseUrl}}/api/users
+Authorization: Bearer {{login.response.body.$.accessToken}}
+Content-Type: application/json
+
+{
+  "email": "member@library.local",
+  "password": "Member#12345",
+  "role": "Member",
+  "memberId": {{memberId}}
+}
+
+### Rotate the login refresh token
+# @name refresh
+POST {{baseUrl}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "{{login.response.body.$.refreshToken}}"
+}
+
+### Revoke the rotated refresh token
+POST {{baseUrl}}/api/auth/logout
+Content-Type: application/json
+
+{
+  "refreshToken": "{{refresh.response.body.$.refreshToken}}"
+}

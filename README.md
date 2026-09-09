@@ -17,10 +17,10 @@ It follows the assessment structure with DTO-based contracts, EF Core, PostgreSQ
 
 ## Running PostgreSQL
 
-Start PostgreSQL with:
+Start only PostgreSQL with:
 
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
 
 ## Running Migrations
@@ -44,7 +44,7 @@ dotnet ef database update --project src/Library.Infrastructure --startup-project
 Run the API with:
 
 ```bash
-dotnet run --project Library.Api/Library.Api.csproj
+dotnet run --project src/Library.Api/Library.Api.csproj
 ```
 
 ## Swagger
@@ -61,6 +61,27 @@ The OpenAPI document is available at:
 http://localhost:5131/openapi/v1.json
 ```
 
+## Authentication
+
+The development database seeds this administrator account:
+
+```text
+Email: admin@library.local
+Password: Admin#12345
+```
+
+The mobile authentication flow uses these endpoints:
+
+| Method | Endpoint | Authentication | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/auth/login` | Anonymous | Issue an access token and refresh token |
+| `POST` | `/api/auth/refresh` | Anonymous | Rotate a valid refresh token and issue a new token pair |
+| `POST` | `/api/auth/logout` | Anonymous | Revoke a refresh token |
+| `GET` | `/api/auth/me` | Bearer token | Return the current account identity |
+| `POST` | `/api/users` | Admin bearer token | Create an Admin or Member login account |
+
+Member accounts must reference an existing member ID. Admin accounts must use a null `memberId`. Access tokens last 60 minutes and refresh tokens last 30 days by default. Store both in the mobile platform's secure credential storage and replace both values after every successful refresh.
+
 All endpoints grouped by resource, with the request and response contracts and documented status codes:
 
 ![Swagger UI overview of the Library API endpoints and schemas](docs/images/swagger-overview.png)
@@ -71,7 +92,7 @@ Each operation documents its request body and every response it can return. For 
 
 ## Example Requests
 
-See [Library.Api.http](/C:/Projects/260709-dotnet-assessment-01/Library.Api/Library.Api.http:1) for ready-to-run examples covering books, members, and borrowings.
+See [Library.Api.http](src/Library.Api/Library.Api.http) for ready-to-run authentication examples.
 
 ## Assumptions
 
