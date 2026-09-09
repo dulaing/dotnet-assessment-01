@@ -38,6 +38,7 @@ namespace Library.Api.Extensions
 
                     options.Events = new JwtBearerEvents
                     {
+                        OnTokenValidated = ValidateActiveAccountAsync,
                         OnChallenge = context => WriteAuthProblemAsync(
                             context.HttpContext,
                             StatusCodes.Status401Unauthorized,
@@ -62,6 +63,39 @@ namespace Library.Api.Extensions
             services.AddScoped<ICurrentUser, CurrentUser>();
 
             return services;
+        }
+
+        // Rejects tokens when the account was removed, changed, or deactivated after issuance.
+        private static async Task ValidateActiveAccountAsync(TokenValidatedContext context)
+        {
+            var userIdValue = context.Principal?.FindFirstValue(ClaimTypes.NameIdentifier)
+                ?? context.Principal?.FindFirstValue("sub");
+            if (!int.TryParse(userIdValue, out var userId))
+            {
+                context.Fail("The token has no valid user identifier.");
+                return;
+            }
+
+            var users = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+            var user = await users.GetByIdAsync(userId, context.HttpContext.RequestAborted);
+            if (user is null || !context.Principal!.IsInRole(user.Role.ToString()))
+            {
+                context.Fail("The account no longer matches this token.");
+                return;
+            }
+
+            if (user.MemberId is null)
+            {
+                return;
+            }
+
+            var tokenMemberId = context.Principal.FindFirstValue("member_id");
+            var members = context.HttpContext.RequestServices.GetRequiredService<IMemberRepository>();
+            var member = await members.GetByIdAsync(user.MemberId.Value, context.HttpContext.RequestAborted);
+            if (member is null || !member.IsActive || tokenMemberId != user.MemberId.Value.ToString())
+            {
+                context.Fail("The member account is inactive or no longer matches this token.");
+            }
         }
 
         // Returns the same machine-readable error shape for policy failures.

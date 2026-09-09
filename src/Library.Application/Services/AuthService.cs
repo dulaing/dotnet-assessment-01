@@ -8,13 +8,15 @@ namespace Library.Application.Services
     public class AuthService
     {
         private readonly IUserRepository _users;
+        private readonly IMemberRepository _members;
         private readonly IPasswordHasher _hasher;
         private readonly ITokenGenerator _tokens;
         private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IUserRepository users, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<AuthService> logger)
+        public AuthService(IUserRepository users, IMemberRepository members, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<AuthService> logger)
         {
             _users = users;
+            _members = members;
             _hasher = hasher;
             _tokens = tokens;
             _logger = logger;
@@ -29,6 +31,16 @@ namespace Library.Application.Services
             {
                 _logger.LogWarning("Failed sign in attempt");
                 return Result<LoginResponse>.Unauthorized("invalid_credentials", "Email or password is incorrect.");
+            }
+
+            if (user.MemberId is not null)
+            {
+                var member = await _members.GetByIdAsync(user.MemberId.Value, cancellationToken);
+                if (member is null || !member.IsActive)
+                {
+                    _logger.LogWarning("Inactive member account {UserId} attempted to sign in", user.Id);
+                    return Result<LoginResponse>.Forbidden("account_inactive", "This member account is inactive.");
+                }
             }
 
             var token = _tokens.Generate(user);

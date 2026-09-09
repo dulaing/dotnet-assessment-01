@@ -20,7 +20,9 @@ namespace Library.Api.Endpoints
             .AddEndpointFilter<ValidationFilter<LoginRequest>>()
             .Produces<LoginResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .ProducesProblem(StatusCodes.Status401Unauthorized);
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .AllowAnonymous();
         }
     }
 }
