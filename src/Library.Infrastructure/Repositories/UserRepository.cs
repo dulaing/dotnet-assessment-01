@@ -1,3 +1,4 @@
+using Library.Application.Common;
 using Library.Application.Interfaces;
 using Library.Domain.Entities;
 using Library.Infrastructure.Persistence;
@@ -14,8 +15,11 @@ namespace Library.Infrastructure.Repositories
             _db = db;
         }
 
-        public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken) =>
-            _db.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+        {
+            var normalizedEmail = EmailNormalizer.Normalize(email);
+            return _db.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail, cancellationToken);
+        }
 
         public Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken) =>
             _db.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);

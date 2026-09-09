@@ -1,3 +1,4 @@
+using Library.Application.Common;
 using Library.Application.Contracts.Users;
 using Library.Application.Interfaces;
 using Library.Domain.Common;
@@ -38,7 +39,8 @@ namespace Library.Application.Services
                 return Result<UserResponse>.Validation("member_link_required", "Member accounts must be linked to a member.");
             }
 
-            if (await _users.GetByEmailAsync(request.Email, cancellationToken) is not null)
+            var email = EmailNormalizer.Normalize(request.Email);
+            if (await _users.GetByEmailAsync(email, cancellationToken) is not null)
             {
                 return Result<UserResponse>.Conflict("user_email_exists", "An account with this email already exists.");
             }
@@ -58,7 +60,7 @@ namespace Library.Application.Services
 
             var user = new User
             {
-                Email = request.Email,
+                Email = email,
                 PasswordHash = _hasher.Hash(request.Password),
                 Role = role,
                 MemberId = request.MemberId

@@ -1,3 +1,4 @@
+using Library.Application.Common;
 using Library.Application.Contracts.Members;
 using Library.Application.Interfaces;
 using Library.Domain.Common;
@@ -43,7 +44,8 @@ namespace Library.Application.Services
 
         public async Task<Result<MemberResponse>> CreateAsync(CreateMemberRequest request, CancellationToken cancellationToken)
         {
-            var existing = await _members.GetByEmailAsync(request.Email, cancellationToken);
+            var email = EmailNormalizer.Normalize(request.Email);
+            var existing = await _members.GetByEmailAsync(email, cancellationToken);
             if (existing is not null)
             {
                 return Result<MemberResponse>.Conflict("email_already_exists", $"A member with email {request.Email} already exists.");
@@ -53,7 +55,7 @@ namespace Library.Application.Services
             var member = new Member
             {
                 FullName = request.FullName,
-                Email = request.Email,
+                Email = email,
                 PhoneNumber = request.PhoneNumber,
                 RegisteredDate = DateTime.UtcNow,
                 IsActive = true
@@ -83,14 +85,15 @@ namespace Library.Application.Services
                 return Result<MemberResponse>.Forbidden("member_status_forbidden", "Members cannot change their account status.");
             }
 
-            var emailOwner = await _members.GetByEmailAsync(request.Email, cancellationToken);
+            var email = EmailNormalizer.Normalize(request.Email);
+            var emailOwner = await _members.GetByEmailAsync(email, cancellationToken);
             if (emailOwner is not null && emailOwner.Id != id)
             {
                 return Result<MemberResponse>.Conflict("email_already_exists", $"A member with email {request.Email} already exists.");
             }
 
             member.FullName = request.FullName;
-            member.Email = request.Email;
+            member.Email = email;
             member.PhoneNumber = request.PhoneNumber;
             member.IsActive = request.IsActive;
 

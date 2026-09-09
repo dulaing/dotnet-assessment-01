@@ -1,3 +1,4 @@
+using Library.Application.Common;
 using Library.Application.Interfaces;
 using Library.Domain.Entities;
 using Library.Domain.Enums;
@@ -26,6 +27,7 @@ namespace Library.Infrastructure.Persistence
                 return;
             }
 
+            email = EmailNormalizer.Normalize(email);
             var users = scope.ServiceProvider.GetRequiredService<IUserRepository>();
 
             if (await users.GetByEmailAsync(email, CancellationToken.None) is not null)

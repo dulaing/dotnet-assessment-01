@@ -1,5 +1,6 @@
 ﻿using Library.Application.Interfaces;
 using Library.Domain.Entities;
+using Library.Application.Common;
 using Library.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,8 +21,11 @@ namespace Library.Infrastructure.Repositories
         public Task<Member?> GetByIdAsync(int id, CancellationToken cancellationToken) =>
             _db.Members.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 
-        public Task<Member?> GetByEmailAsync(string email, CancellationToken cancellationToken) =>
-            _db.Members.FirstOrDefaultAsync(m => m.Email == email, cancellationToken);
+        public Task<Member?> GetByEmailAsync(string email, CancellationToken cancellationToken)
+        {
+            var normalizedEmail = EmailNormalizer.Normalize(email);
+            return _db.Members.FirstOrDefaultAsync(m => m.Email == normalizedEmail, cancellationToken);
+        }
 
         public async Task AddAsync(Member member, CancellationToken cancellationToken) =>
             await _db.Members.AddAsync(member, cancellationToken);

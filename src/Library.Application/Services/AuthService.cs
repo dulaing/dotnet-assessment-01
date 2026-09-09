@@ -1,3 +1,4 @@
+using Library.Application.Common;
 using Library.Application.Contracts.Auth;
 using Library.Application.Interfaces;
 using Library.Domain.Common;
@@ -24,7 +25,8 @@ namespace Library.Application.Services
 
         public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
         {
-            var user = await _users.GetByEmailAsync(request.Email, cancellationToken);
+            var email = EmailNormalizer.Normalize(request.Email);
+            var user = await _users.GetByEmailAsync(email, cancellationToken);
 
             // one message for both cases, so nobody can probe which emails exist
             if (user is null || !_hasher.Verify(request.Password, user.PasswordHash))
