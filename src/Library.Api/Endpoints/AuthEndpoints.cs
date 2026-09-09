@@ -24,6 +24,20 @@ namespace Library.Api.Endpoints
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .AllowAnonymous();
 
+            // Rotates a refresh token so mobile sessions survive access-token expiry.
+            group.MapPost("/refresh", async (RefreshTokenRequest request, AuthService service, HttpContext http, CancellationToken ct) =>
+            {
+                var result = await service.RefreshAsync(request, ct);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblem(http);
+            })
+            .WithName("RefreshAccessToken")
+            .AddEndpointFilter<ValidationFilter<RefreshTokenRequest>>()
+            .Produces<RefreshTokenResponse>()
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .AllowAnonymous();
+
             // Returns the persisted identity represented by the caller's access token.
             group.MapGet("/me", async (AuthService service, HttpContext http, CancellationToken ct) =>
             {

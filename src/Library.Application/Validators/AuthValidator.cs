@@ -11,4 +11,13 @@ namespace Library.Application.Validators
             RuleFor(x => x.Password).NotEmpty();
         }
     }
+
+    // Rejects empty refresh-token requests before database lookup.
+    public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenRequest>
+    {
+        public RefreshTokenRequestValidator()
+        {
+            RuleFor(x => x.RefreshToken).NotEmpty().MaximumLength(200);
+        }
+    }
 }

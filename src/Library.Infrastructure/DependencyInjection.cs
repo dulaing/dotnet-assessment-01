@@ -20,8 +20,10 @@ namespace Library.Infrastructure
             services.AddScoped<IMemberRepository, MemberRepository>();
             services.AddScoped<IBorrowingRepository, BorrowingRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
             services.AddScoped<IPasswordHasher, IdentityPasswordHasher>();
             services.AddScoped<ITokenGenerator, JwtTokenGenerator>();
+            services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
 
             // the db check lives here because this layer owns the DbContext
             services.AddHealthChecks().AddDbContextCheck<LibraryDbContext>("database");

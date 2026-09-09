@@ -2,6 +2,7 @@ using Library.Application.Common;
 using Library.Application.Contracts.Auth;
 using Library.Application.Interfaces;
 using Library.Domain.Common;
+using Library.Domain.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Library.Application.Services
@@ -12,15 +13,27 @@ namespace Library.Application.Services
         private readonly IMemberRepository _members;
         private readonly IPasswordHasher _hasher;
         private readonly ITokenGenerator _tokens;
+        private readonly IRefreshTokenGenerator _refreshTokenGenerator;
+        private readonly IRefreshTokenRepository _refreshTokens;
         private readonly ILogger<AuthService> _logger;
         private readonly ICurrentUser _currentUser;
 
-        public AuthService(IUserRepository users, IMemberRepository members, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<AuthService> logger, ICurrentUser currentUser)
+        public AuthService(
+            IUserRepository users,
+            IMemberRepository members,
+            IPasswordHasher hasher,
+            ITokenGenerator tokens,
+            IRefreshTokenGenerator refreshTokenGenerator,
+            IRefreshTokenRepository refreshTokens,
+            ILogger<AuthService> logger,
+            ICurrentUser currentUser)
         {
             _users = users;
             _members = members;
             _hasher = hasher;
             _tokens = tokens;
+            _refreshTokenGenerator = refreshTokenGenerator;
+            _refreshTokens = refreshTokens;
             _logger = logger;
             _currentUser = currentUser;
         }
@@ -37,22 +50,69 @@ namespace Library.Application.Services
                 return Result<LoginResponse>.Unauthorized("invalid_credentials", "Email or password is incorrect.");
             }
 
-            if (user.MemberId is not null)
+            var activeAccount = await EnsureAccountIsActiveAsync(user, cancellationToken);
+            if (!activeAccount.IsSuccess)
             {
-                var member = await _members.GetByIdAsync(user.MemberId.Value, cancellationToken);
-                if (member is null || !member.IsActive)
-                {
-                    _logger.LogWarning("Inactive member account {UserId} attempted to sign in", user.Id);
-                    return Result<LoginResponse>.Forbidden("account_inactive", "This member account is inactive.");
-                }
+                return activeAccount.ToFailure<LoginResponse>();
             }
 
-            var token = _tokens.Generate(user);
+            var accessToken = _tokens.Generate(user);
+            var refreshToken = _refreshTokenGenerator.Generate();
+            await StoreRefreshTokenAsync(user.Id, refreshToken, cancellationToken);
 
             _logger.LogInformation("User {UserId} signed in with role {Role}", user.Id, user.Role);
 
             return Result<LoginResponse>.Success(
-                new LoginResponse(user.Id, token.Token, token.ExpiresAtUtc, user.Role.ToString(), user.MemberId));
+                new LoginResponse(
+                    user.Id,
+                    accessToken.Token,
+                    accessToken.ExpiresAtUtc,
+                    refreshToken.Token,
+                    refreshToken.ExpiresAtUtc,
+                    user.Role.ToString(),
+                    user.MemberId));
+        }
+
+        // Rotates a valid refresh token and returns a new access and refresh token pair.
+        public async Task<Result<RefreshTokenResponse>> RefreshAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+            var tokenHash = _refreshTokenGenerator.Hash(request.RefreshToken);
+            var storedToken = await _refreshTokens.GetByHashAsync(tokenHash, cancellationToken);
+            var now = DateTime.UtcNow;
+            if (storedToken is null || !storedToken.IsActiveAt(now))
+            {
+                return Result<RefreshTokenResponse>.Unauthorized("invalid_refresh_token", "The refresh token is invalid or expired.");
+            }
+
+            var user = await _users.GetByIdAsync(storedToken.UserId, cancellationToken);
+            if (user is null)
+            {
+                return Result<RefreshTokenResponse>.Unauthorized("account_not_found", "The account no longer exists.");
+            }
+
+            var activeAccount = await EnsureAccountIsActiveAsync(user, cancellationToken);
+            if (!activeAccount.IsSuccess)
+            {
+                return activeAccount.ToFailure<RefreshTokenResponse>();
+            }
+
+            var nextRefreshToken = _refreshTokenGenerator.Generate();
+            storedToken.Revoke(now, nextRefreshToken.Hash);
+            await AddRefreshTokenAsync(user.Id, nextRefreshToken, cancellationToken);
+            await _refreshTokens.SaveChangesAsync(cancellationToken);
+
+            var accessToken = _tokens.Generate(user);
+            _logger.LogInformation("User {UserId} rotated a refresh token", user.Id);
+
+            return Result<RefreshTokenResponse>.Success(
+                new RefreshTokenResponse(
+                    user.Id,
+                    accessToken.Token,
+                    accessToken.ExpiresAtUtc,
+                    nextRefreshToken.Token,
+                    nextRefreshToken.ExpiresAtUtc,
+                    user.Role.ToString(),
+                    user.MemberId));
         }
 
         // Loads the current account from the database instead of trusting display claims alone.
@@ -72,5 +132,40 @@ namespace Library.Application.Services
             return Result<CurrentUserResponse>.Success(
                 new CurrentUserResponse(user.Id, user.Email, user.Role.ToString(), user.MemberId));
         }
+
+        // Applies the member activation rule to both login and token rotation.
+        private async Task<Result<bool>> EnsureAccountIsActiveAsync(User user, CancellationToken cancellationToken)
+        {
+            if (user.MemberId is null)
+            {
+                return Result<bool>.Success(true);
+            }
+
+            var member = await _members.GetByIdAsync(user.MemberId.Value, cancellationToken);
+            if (member is not null && member.IsActive)
+            {
+                return Result<bool>.Success(true);
+            }
+
+            _logger.LogWarning("Inactive member account {UserId} attempted to authenticate", user.Id);
+            return Result<bool>.Forbidden("account_inactive", "This member account is inactive.");
+        }
+
+        // Persists a newly issued refresh-token hash during login.
+        private async Task StoreRefreshTokenAsync(int userId, GeneratedRefreshToken token, CancellationToken cancellationToken)
+        {
+            await AddRefreshTokenAsync(userId, token, cancellationToken);
+            await _refreshTokens.SaveChangesAsync(cancellationToken);
+        }
+
+        // Adds a token entity without persisting the raw secret.
+        private Task AddRefreshTokenAsync(int userId, GeneratedRefreshToken token, CancellationToken cancellationToken) =>
+            _refreshTokens.AddAsync(new RefreshToken
+            {
+                UserId = userId,
+                TokenHash = token.Hash,
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = token.ExpiresAtUtc
+            }, cancellationToken);
     }
 }

@@ -15,6 +15,7 @@ namespace Library.Infrastructure.Persistence
         public DbSet<Member> Members => Set<Member>();
         public DbSet<Borrowing> Borrowings => Set<Borrowing>();
         public DbSet<User> Users => Set<User>();
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
