@@ -32,7 +32,10 @@ builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BorrowingService>();
 
 builder.Services.AddOpenApi(options =>
-    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+    options.AddOperationTransformer<AnonymousOperationTransformer>();
+});
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
