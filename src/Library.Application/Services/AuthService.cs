@@ -115,6 +115,26 @@ namespace Library.Application.Services
                     user.MemberId));
         }
 
+        // Revokes the presented refresh token and stays idempotent for unknown tokens.
+        public async Task<Result<bool>> LogoutAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+            var tokenHash = _refreshTokenGenerator.Hash(request.RefreshToken);
+            var storedToken = await _refreshTokens.GetByHashAsync(tokenHash, cancellationToken);
+            if (storedToken is null)
+            {
+                return Result<bool>.Success(true);
+            }
+
+            if (storedToken.RevokedAtUtc is null)
+            {
+                storedToken.Revoke(DateTime.UtcNow);
+                await _refreshTokens.SaveChangesAsync(cancellationToken);
+            }
+
+            _logger.LogInformation("Refresh token {RefreshTokenId} was revoked during logout", storedToken.Id);
+            return Result<bool>.Success(true);
+        }
+
         // Loads the current account from the database instead of trusting display claims alone.
         public async Task<Result<CurrentUserResponse>> GetCurrentAsync(CancellationToken cancellationToken)
         {

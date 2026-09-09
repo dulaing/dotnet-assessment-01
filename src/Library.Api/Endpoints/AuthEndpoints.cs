@@ -38,6 +38,18 @@ namespace Library.Api.Endpoints
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .AllowAnonymous();
 
+            // Revokes a refresh token even when its paired access token has expired.
+            group.MapPost("/logout", async (RefreshTokenRequest request, AuthService service, CancellationToken ct) =>
+            {
+                await service.LogoutAsync(request, ct);
+                return Results.NoContent();
+            })
+            .WithName("Logout")
+            .AddEndpointFilter<ValidationFilter<RefreshTokenRequest>>()
+            .Produces(StatusCodes.Status204NoContent)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .AllowAnonymous();
+
             // Returns the persisted identity represented by the caller's access token.
             group.MapGet("/me", async (AuthService service, HttpContext http, CancellationToken ct) =>
             {
