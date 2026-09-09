@@ -2,6 +2,7 @@
 using Library.Application.Services;
 using Library.Infrastructure;
 using Library.Api.Handlers;
+using Library.Api.OpenApi;
 using Library.Infrastructure.Persistence;
 
 using FluentValidation;
@@ -30,7 +31,8 @@ builder.Services.AddScoped<BookService>();
 builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BorrowingService>();
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
 builder.Services.AddScoped<AuthService>();
 
