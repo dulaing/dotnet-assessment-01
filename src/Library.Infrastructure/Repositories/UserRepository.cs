@@ -20,6 +20,9 @@ namespace Library.Infrastructure.Repositories
         public Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken) =>
             _db.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
+        public Task<User?> GetByMemberIdAsync(int memberId, CancellationToken cancellationToken) =>
+            _db.Users.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+
         public async Task AddAsync(User user, CancellationToken cancellationToken) =>
             await _db.Users.AddAsync(user, cancellationToken);
 

@@ -16,6 +16,7 @@ namespace Library.Infrastructure.Persistence.Configurations
             builder.Property(u => u.Role).IsRequired();
 
             builder.HasIndex(u => u.Email).IsUnique();
+            builder.HasIndex(u => u.MemberId).IsUnique();
 
             builder.HasOne<Member>()
                 .WithMany()

@@ -35,6 +35,7 @@ builder.Services.AddOpenApi(options =>
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>());
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UserService>();
 
 // validates the bearer token on every incoming request
 builder.Services.AddJwtAuthentication(builder.Configuration);
@@ -59,6 +60,7 @@ app.MapMemberEndpoints();
 app.MapBorrowingEndpoints();
 
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 
 // no checks at all, so this only proves the process is up and answering
 app.MapHealthChecks("/alive", new HealthCheckOptions { Predicate = _ => false });
