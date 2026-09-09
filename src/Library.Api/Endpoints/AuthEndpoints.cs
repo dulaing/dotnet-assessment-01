@@ -23,6 +23,17 @@ namespace Library.Api.Endpoints
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status403Forbidden)
             .AllowAnonymous();
+
+            // Returns the persisted identity represented by the caller's access token.
+            group.MapGet("/me", async (AuthService service, HttpContext http, CancellationToken ct) =>
+            {
+                var result = await service.GetCurrentAsync(ct);
+                return result.IsSuccess ? Results.Ok(result.Value) : result.ToProblem(http);
+            })
+            .WithName("GetCurrentUser")
+            .Produces<CurrentUserResponse>()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
         }
     }
 }

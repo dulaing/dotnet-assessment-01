@@ -5,6 +5,7 @@ namespace Library.Application.Interfaces
     {
         bool IsAuthenticated { get; }
         bool IsAdmin { get; }
+        int? UserId { get; }
 
         // null for admins, since a librarian has no member record
         int? MemberId { get; }

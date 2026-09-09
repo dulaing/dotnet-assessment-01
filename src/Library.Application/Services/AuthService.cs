@@ -13,14 +13,16 @@ namespace Library.Application.Services
         private readonly IPasswordHasher _hasher;
         private readonly ITokenGenerator _tokens;
         private readonly ILogger<AuthService> _logger;
+        private readonly ICurrentUser _currentUser;
 
-        public AuthService(IUserRepository users, IMemberRepository members, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<AuthService> logger)
+        public AuthService(IUserRepository users, IMemberRepository members, IPasswordHasher hasher, ITokenGenerator tokens, ILogger<AuthService> logger, ICurrentUser currentUser)
         {
             _users = users;
             _members = members;
             _hasher = hasher;
             _tokens = tokens;
             _logger = logger;
+            _currentUser = currentUser;
         }
 
         public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -50,7 +52,25 @@ namespace Library.Application.Services
             _logger.LogInformation("User {UserId} signed in with role {Role}", user.Id, user.Role);
 
             return Result<LoginResponse>.Success(
-                new LoginResponse(token.Token, token.ExpiresAtUtc, user.Role.ToString(), user.MemberId));
+                new LoginResponse(user.Id, token.Token, token.ExpiresAtUtc, user.Role.ToString(), user.MemberId));
+        }
+
+        // Loads the current account from the database instead of trusting display claims alone.
+        public async Task<Result<CurrentUserResponse>> GetCurrentAsync(CancellationToken cancellationToken)
+        {
+            if (!_currentUser.IsAuthenticated || _currentUser.UserId is null)
+            {
+                return Result<CurrentUserResponse>.Unauthorized("authentication_required", "A valid bearer token is required.");
+            }
+
+            var user = await _users.GetByIdAsync(_currentUser.UserId.Value, cancellationToken);
+            if (user is null)
+            {
+                return Result<CurrentUserResponse>.Unauthorized("account_not_found", "The authenticated account no longer exists.");
+            }
+
+            return Result<CurrentUserResponse>.Success(
+                new CurrentUserResponse(user.Id, user.Email, user.Role.ToString(), user.MemberId));
         }
     }
 }

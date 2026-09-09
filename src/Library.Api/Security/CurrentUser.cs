@@ -20,6 +20,16 @@ namespace Library.Api.Security
 
         public bool IsAdmin => Principal?.IsInRole(nameof(UserRole.Admin)) ?? false;
 
+        public int? UserId
+        {
+            get
+            {
+                var value = Principal?.FindFirstValue(ClaimTypes.NameIdentifier)
+                    ?? Principal?.FindFirstValue("sub");
+                return int.TryParse(value, out var userId) ? userId : null;
+            }
+        }
+
         public int? MemberId =>
             int.TryParse(Principal?.FindFirstValue("member_id"), out var memberId) ? memberId : null;
     }
