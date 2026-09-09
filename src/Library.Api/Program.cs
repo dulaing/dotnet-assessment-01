@@ -5,6 +5,7 @@ using Library.Api.Handlers;
 using Library.Infrastructure.Persistence;
 
 using FluentValidation;
+using Library.Api.Extensions;
 using Library.Application.Validators;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
@@ -33,10 +34,17 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<AuthService>();
 
+// validates the bearer token on every incoming request
+builder.Services.AddJwtAuthentication(builder.Configuration);
+
 var app =  builder.Build();
 
 // global exception handler
 app.UseExceptionHandler();
+
+// order matters: work out who the caller is, then decide what they may do
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
