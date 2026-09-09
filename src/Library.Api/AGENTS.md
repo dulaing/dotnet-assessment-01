@@ -64,3 +64,4 @@ This file contains a growing ruleset that improves over time. **At session start
 28. [STYLE] Always add a single short comment when the purpose of a new file, type, or non-obvious block would be unclear to a learner, because maintainability here requires brief why-oriented guidance without long AI-style comment walls.
 29. [STYLE] Always add one short purpose comment above each CRUD endpoint mapping, because endpoint blocks should be easy to scan for learners without adding noisy comment walls.
 30. [STYLE] Always add a short one-line learning comment for each method, class, and meaningful logic block, because this assessment code should help learners understand the purpose of each piece without long explanations.
+31. [TOOL] Always use `Invoke-RestMethod` instead of `curl.exe` for JSON smoke tests in PowerShell, because native argument handling can strip JSON quotes and send a malformed request.
