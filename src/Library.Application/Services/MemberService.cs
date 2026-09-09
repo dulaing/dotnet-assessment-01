@@ -10,11 +10,13 @@ namespace Library.Application.Services
     {
         private readonly IMemberRepository _members;
         private readonly IBorrowingRepository _borrowings;
+        private readonly ICurrentUser _currentUser;
 
-        public MemberService(IMemberRepository members, IBorrowingRepository borrowings)
+        public MemberService(IMemberRepository members, IBorrowingRepository borrowings, ICurrentUser currentUser)
         {
             _members = members;
             _borrowings = borrowings;
+            _currentUser = currentUser;
         }
 
         public async Task<List<MemberResponse>> GetAllAsync(CancellationToken cancellationToken)
@@ -25,6 +27,11 @@ namespace Library.Application.Services
 
         public async Task<Result<MemberResponse>> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
+            if (!CanAccess(id))
+            {
+                return Result<MemberResponse>.Forbidden("member_access_forbidden", "You cannot access another member's profile.");
+            }
+
             var member = await _members.GetByIdAsync(id, cancellationToken);
             if (member is null)
             {
@@ -60,10 +67,20 @@ namespace Library.Application.Services
 
         public async Task<Result<MemberResponse>> UpdateAsync(int id, UpdateMemberRequest request, CancellationToken cancellationToken)
         {
+            if (!CanAccess(id))
+            {
+                return Result<MemberResponse>.Forbidden("member_access_forbidden", "You cannot update another member's profile.");
+            }
+
             var member = await _members.GetByIdAsync(id, cancellationToken);
             if (member is null)
             {
                 return Result<MemberResponse>.NotFound("member_not_found", $"Member {id} was not found.");
+            }
+
+            if (!_currentUser.IsAdmin && request.IsActive != member.IsActive)
+            {
+                return Result<MemberResponse>.Forbidden("member_status_forbidden", "Members cannot change their account status.");
             }
 
             var emailOwner = await _members.GetByEmailAsync(request.Email, cancellationToken);
@@ -101,6 +118,10 @@ namespace Library.Application.Services
 
             return Result<bool>.Success(true);
         }
+
+        // Admins can access every member while members can access only their own record.
+        private bool CanAccess(int memberId) =>
+            _currentUser.IsAdmin || _currentUser.MemberId == memberId;
 
         private static MemberResponse ToResponse(Member member) => new(
             member.Id,

@@ -2,6 +2,7 @@ using Library.Api.Extensions;
 using Library.Application.Contracts.Books;
 using Library.Application.Services;
 using Library.Api.Filters;
+using Library.Api.Security;
 
 namespace Library.Api.Endpoints
 {
@@ -16,7 +17,9 @@ namespace Library.Api.Endpoints
             group.MapGet("", async (BookService service, CancellationToken ct) =>
                 Results.Ok(await service.GetAllAsync(ct)))
                 .WithName("GetBooks")
-                .Produces<List<BookResponse>>();
+                .Produces<List<BookResponse>>()
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .RequireAuthorization();
 
             // .Produces<...>() is documentation only. It changes nothing at runtime. 
             // It tells Swagger "this returns a BookResponse on success and a problem on 404" so the generated page shows real shapes instead of guessing.
@@ -29,7 +32,9 @@ namespace Library.Api.Endpoints
             })
             .WithName("GetBookById")
             .Produces<BookResponse>()
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .RequireAuthorization();
 
             group.MapPost("", async (CreateBookRequest request, BookService service, HttpContext http, CancellationToken ct) =>
             {
@@ -42,7 +47,8 @@ namespace Library.Api.Endpoints
             .Produces<BookResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .AddEndpointFilter<ValidationFilter<CreateBookRequest>>();
+            .AddEndpointFilter<ValidationFilter<CreateBookRequest>>()
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
 
             group.MapPut("/{id:int}", async (int id, UpdateBookRequest request, BookService service, HttpContext http, CancellationToken ct) =>
             {
@@ -54,7 +60,8 @@ namespace Library.Api.Endpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .AddEndpointFilter<ValidationFilter<UpdateBookRequest>>();
+            .AddEndpointFilter<ValidationFilter<UpdateBookRequest>>()
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
             
 
             group.MapDelete("/{id:int}", async (int id, BookService service, HttpContext http, CancellationToken ct) =>
@@ -65,7 +72,8 @@ namespace Library.Api.Endpoints
             .WithName("DeleteBook")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
         }
     }
 }

@@ -2,6 +2,7 @@ using Library.Api.Extensions;
 using Library.Application.Contracts.Borrowings;
 using Library.Application.Services;
 using Library.Api.Filters;
+using Library.Api.Security;
 
 namespace Library.Api.Endpoints
 {
@@ -14,7 +15,10 @@ namespace Library.Api.Endpoints
             group.MapGet("", async (BorrowingService service, CancellationToken ct) =>
                 Results.Ok(await service.GetAllAsync(ct)))
                 .WithName("GetBorrowings")
-                .Produces<List<BorrowingResponse>>();
+                .Produces<List<BorrowingResponse>>()
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(AuthorizationPolicies.AdminOnly);
 
             group.MapPost("", async (CreateBorrowingRequest request, BorrowingService service, HttpContext http, CancellationToken ct) =>
             {
@@ -26,7 +30,10 @@ namespace Library.Api.Endpoints
             .WithName("BorrowBook")
             .Produces<BorrowingResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .RequireAuthorization();
 
             group.MapPost("/{id:int}/return", async (int id, BorrowingService service, HttpContext http, CancellationToken ct) =>
             {
@@ -38,7 +45,10 @@ namespace Library.Api.Endpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .AddEndpointFilter<ValidationFilter<CreateBorrowingRequest>>();
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .AddEndpointFilter<ValidationFilter<CreateBorrowingRequest>>()
+            .RequireAuthorization();
 
             // sits under the member url but returns borrowings, so it is mapped with them
             app.MapGet("/api/members/{memberId:int}/borrowings", async (int memberId, BorrowingService service, HttpContext http, CancellationToken ct) =>
@@ -49,7 +59,10 @@ namespace Library.Api.Endpoints
             .WithTags("Borrowings")
             .WithName("GetBorrowingsByMember")
             .Produces<List<BorrowingResponse>>()
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .RequireAuthorization();
         }
     }
 }

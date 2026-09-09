@@ -17,18 +17,25 @@ namespace Library.Application.Services
         private readonly IMemberRepository _members;
         private readonly IBorrowingRepository _borrowings;
         private readonly ILogger<BorrowingService> _logger;
+        private readonly ICurrentUser _currentUser;
         
 
-        public BorrowingService(IBookRepository books, IMemberRepository members, IBorrowingRepository borrowings, ILogger<BorrowingService> logger)
+        public BorrowingService(IBookRepository books, IMemberRepository members, IBorrowingRepository borrowings, ILogger<BorrowingService> logger, ICurrentUser currentUser)
         {
             _books = books;
             _members = members;
             _borrowings = borrowings;
             _logger = logger;
+            _currentUser = currentUser;
         }
 
         public async Task<Result<BorrowingResponse>> BorrowAsync(CreateBorrowingRequest request, CancellationToken cancellationToken)
         {
+            if (!CanAccess(request.MemberId))
+            {
+                return Result<BorrowingResponse>.Forbidden("borrowing_access_forbidden", "You cannot borrow a book for another member.");
+            }
+
             // is the member real?
             var member = await _members.GetByIdAsync(request.MemberId, cancellationToken);
             if (member is null)
@@ -97,6 +104,11 @@ namespace Library.Application.Services
                 return Result<BorrowingResponse>.NotFound("borrowing_not_found", $"Borrowing {borrowingId} was not found.");
             }
 
+            if (!CanAccess(borrowing.MemberId))
+            {
+                return Result<BorrowingResponse>.Forbidden("borrowing_access_forbidden", "You cannot return another member's borrowing.");
+            }
+
             // which book was it
             var book = await _books.GetByIdAsync(borrowing.BookId, cancellationToken);
             if (book is null)
@@ -137,6 +149,11 @@ namespace Library.Application.Services
 
         public async Task<Result<List<BorrowingResponse>>> GetByMemberIdAsync(int memberId, CancellationToken cancellationToken)
         {
+            if (!CanAccess(memberId))
+            {
+                return Result<List<BorrowingResponse>>.Forbidden("borrowing_access_forbidden", "You cannot view another member's borrowing history.");
+            }
+
             var member = await _members.GetByIdAsync(memberId, cancellationToken);
             if (member is null)
             {
@@ -146,6 +163,10 @@ namespace Library.Application.Services
             var borrowings = await _borrowings.GetByMemberIdAsync(memberId, cancellationToken);
             return Result<List<BorrowingResponse>>.Success(borrowings.Select(ToResponse).ToList());
         }
+
+        // Admins can act for every member while members can act only for themselves.
+        private bool CanAccess(int memberId) =>
+            _currentUser.IsAdmin || _currentUser.MemberId == memberId;
 
         private static BorrowingResponse ToResponse(Borrowing borrowing) => new(
             borrowing.Id,
@@ -157,4 +178,3 @@ namespace Library.Application.Services
             borrowing.Status.ToString());
     }
 }
- 

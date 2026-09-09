@@ -7,6 +7,7 @@ namespace Library.Domain.Common
         Conflict,
         Validation,
         Unauthorized,
+        Forbidden,
     }
 
     // basically a small object used to hold information about an error
@@ -52,5 +53,7 @@ namespace Library.Domain.Common
 
         public static Result<T> Validation(string code, string message) => Failure(new ResultError(ResultErrorType.Validation, code, message));
         public static Result<T> Unauthorized(string code, string message) => Failure(new ResultError(ResultErrorType.Unauthorized, code, message));
+
+        public static Result<T> Forbidden(string code, string message) => Failure(new ResultError(ResultErrorType.Forbidden, code, message));
     }
 }

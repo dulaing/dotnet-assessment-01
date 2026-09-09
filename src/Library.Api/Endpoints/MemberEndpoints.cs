@@ -2,6 +2,7 @@ using Library.Api.Extensions;
 using Library.Application.Contracts.Members;
 using Library.Application.Services;
 using Library.Api.Filters;
+using Library.Api.Security;
 
 namespace Library.Api.Endpoints
 {
@@ -14,7 +15,10 @@ namespace Library.Api.Endpoints
             group.MapGet("", async (MemberService service, CancellationToken ct) =>
                 Results.Ok(await service.GetAllAsync(ct)))
                 .WithName("GetMembers")
-                .Produces<List<MemberResponse>>();
+                .Produces<List<MemberResponse>>()
+                .ProducesProblem(StatusCodes.Status401Unauthorized)
+                .ProducesProblem(StatusCodes.Status403Forbidden)
+                .RequireAuthorization(AuthorizationPolicies.AdminOnly);
 
             group.MapGet("/{id:int}", async (int id, MemberService service, HttpContext http, CancellationToken ct) =>
             {
@@ -23,7 +27,10 @@ namespace Library.Api.Endpoints
             })
             .WithName("GetMemberById")
             .Produces<MemberResponse>()
-            .ProducesProblem(StatusCodes.Status404NotFound);
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .RequireAuthorization();
 
             group.MapPost("", async (CreateMemberRequest request, MemberService service, HttpContext http, CancellationToken ct) =>
             {
@@ -36,7 +43,8 @@ namespace Library.Api.Endpoints
             .Produces<MemberResponse>(StatusCodes.Status201Created)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .AddEndpointFilter<ValidationFilter<CreateMemberRequest>>();
+            .AddEndpointFilter<ValidationFilter<CreateMemberRequest>>()
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
 
             group.MapPut("/{id:int}", async (int id, UpdateMemberRequest request, MemberService service, HttpContext http, CancellationToken ct) =>
             {
@@ -48,7 +56,9 @@ namespace Library.Api.Endpoints
             .ProducesProblem(StatusCodes.Status404NotFound)
             .ProducesProblem(StatusCodes.Status409Conflict)
             .ProducesProblem(StatusCodes.Status400BadRequest)
-            .AddEndpointFilter<ValidationFilter<UpdateMemberRequest>>();
+            .ProducesProblem(StatusCodes.Status403Forbidden)
+            .AddEndpointFilter<ValidationFilter<UpdateMemberRequest>>()
+            .RequireAuthorization();
 
             group.MapDelete("/{id:int}", async (int id, MemberService service, HttpContext http, CancellationToken ct) =>
             {
@@ -58,7 +68,8 @@ namespace Library.Api.Endpoints
             .WithName("DeleteMember")
             .Produces(StatusCodes.Status204NoContent)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .ProducesProblem(StatusCodes.Status409Conflict);
+            .ProducesProblem(StatusCodes.Status409Conflict)
+            .RequireAuthorization(AuthorizationPolicies.AdminOnly);
         }
     }
 }
