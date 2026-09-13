@@ -86,6 +86,6 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     }
 }); 
 
-await app.Services.SeedAdminAsync();
+await app.Services.SeedAsync();
 
 app.Run();
